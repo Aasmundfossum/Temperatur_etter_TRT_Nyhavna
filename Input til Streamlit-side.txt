@@ -1,0 +1,19 @@
+B3: 
+140 m til 355 m
+0 grader til 6 grader
+4.5, 4, 5 timer etter test
+
+B4: 
+253 m til 355 m
+0 grader til 6 grader
+1, 2, 3, 4, 5 timer etter test
+
+B5: 
+204 m til 355 m
+0 grader til 6 grader
+0, 1, 2, 3, 4, 5 timer etter test
+
+B6:
+194 m til 355 m
+0 grader til 6 grader
+0, 1, 2, 3 timer etter test

@@ -6,12 +6,12 @@ from datetime import datetime
 import os
 import io
 
-st.set_page_config(page_title="Data fra Nyhavna", page_icon="🔥")
+st.set_page_config(page_title="Temperaturdata", page_icon="🔥")
 
 with open("styles/main.css") as f:
     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
 
-st.title('Temperaturdata fra Nyhavna')
+st.title('Verktøy for plotting av temperaturmålinger før og etter termisk responstest')
 valgt_bronn = st.selectbox('Velg brønn',options=['B3_CH1','B3_CH2','B4','B5','B6'])
 
 mappenavn = f'{valgt_bronn}_datafiler'
@@ -121,8 +121,21 @@ with c1:
 with c2:
     maks_y = st.number_input('Største verdi y-akse basert på figuren over:',value=500,min_value=-1000,max_value=1000,step=1)
 
-til_figurtittel = st.text_input("Tillegg til figurtittel")
+til_figurtittel = st.text_input('Tillegg til figurtittel, f.eks. "2 timer etter test"')
+st.markdown('---')
 
+sammenlikn = st.checkbox('Sammenlikn med grovere måling av uforstyrret temperatur')
+
+if sammenlikn == True:
+    sammenlikn_fil = st.file_uploader('Excel-fil med TRT-data og beregninger', type='xlsm')
+    kalibrering = st.number_input('Korreksjon av temperaturmålinger (antall grader som plusses på)', value=0.0, step=0.1)
+    if sammenlikn_fil:
+        grov_temp = pd.read_excel(sammenlikn_fil, sheet_name='Uforstyrret temperatur', usecols='A,B')
+        grov_temp=grov_temp.loc[5:]
+        grov_temp=grov_temp.reset_index(drop=True)
+        grov_temp.columns = ['Temp', 'Dybde']
+else:
+    kalibrering = 0
 
 df_slutt = df_slutt[df_slutt['Lengde'] >= min_y] 
 df_slutt = df_slutt[df_slutt['Lengde'] <= maks_y] 
@@ -130,11 +143,14 @@ df_slutt = df_slutt.reset_index(drop=True)
 
 dybde = df_slutt['Lengde']-df_slutt['Lengde'].iloc[0]
 df_slutt['Dybde'] = dybde
+df_slutt['Temp'] = df_slutt['Temp'] + kalibrering
 
 st.markdown('')
+st.markdown('---')
 st.markdown(f'**Temperatur i brønn {valgt_bronn} den {formatted_datetime}:**')
-
 fig = px.line(df_slutt, x='Temp', y='Dybde',title=f'Temperatur i testbrønn den {formatted_datetime} ({til_figurtittel})', color_discrete_sequence=['#367A2F', '#FFC358'])
+if sammenlikn and sammenlikn_fil:
+    fig.add_trace(px.line(grov_temp, x='Temp', y='Dybde', color_discrete_sequence=['#FFC358']).data[0])
 fig.update_layout(xaxis_title='Temperatur (\u2103)', yaxis_title='Dybde (m)',legend_title=None)
 fig.update_layout(height=600)
 fig.update_yaxes(autorange="reversed")
@@ -155,6 +171,7 @@ fig.update_layout(
     paper_bgcolor='white',  # Set the background color of the plot
     plot_bgcolor='white',   # Set the background color of the plot area
 )
+
 #fig.update_yaxes(range=[min_y-df_slutt['Lengde'].iloc[0], maks_y-df_slutt['Lengde'].iloc[0]])
 st.plotly_chart(fig)
 

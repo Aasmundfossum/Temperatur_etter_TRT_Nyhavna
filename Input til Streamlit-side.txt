@@ -1,17 +1,31 @@
+Input for testbrønner på Nyhavna.
+
 B3: 
 140 m til 355 m
 0 grader til 6 grader
-4.5, 4, 5 timer etter test
+3 døgn før, 3.5, 4, 5, 6, 7 timer etter test
+28.11 kl. 12.37.30, 
+5.12 kl 10.27.28, 
+5.12 kl. 10.52.29
+...
+5.13 kl. 13.52.28
+Addisjonsfaktor: 9.3 grader før test, 10.3 grader 7 timer etter test
 
 B4: 
 253 m til 355 m
 0 grader til 6 grader
 1, 2, 3, 4, 5 timer etter test
+Før test: 15.12 kl 15.30.13
+...
+Addisjonsfaktor: 7.9 grader før test
 
 B5: 
 204 m til 355 m
 0 grader til 6 grader
 0, 1, 2, 3, 4, 5 timer etter test
+Før test: 11.12 kl. 15.02.13
+...
+Addisjonsfaktor: 9.2 grader før test
 
 B6:
 194 m til 355 m

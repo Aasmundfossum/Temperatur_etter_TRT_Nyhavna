@@ -111,15 +111,17 @@ st.markdown('---')
 st.subheader('Temperaturplot med valgte aksegrenser og korrigert for brønndybde:')
 c1, c2 = st.columns(2)
 with c1:
-    min_x = st.number_input('Minste verdi x-akse basert på figuren over:',value=-3.0,min_value=-20.0,max_value=20.0,step=0.1)
+    min_x = st.number_input('Min x:',value=-3.0,min_value=-20.0,max_value=20.0,step=0.1)
 with c2:
-    maks_x = st.number_input('Største verdi x-akse basert på figuren over:',value=3.0,min_value=-20.0,max_value=20.0,step=0.1)
+    maks_x = st.number_input('Maks x:',value=3.0,min_value=-20.0,max_value=20.0,step=0.1)
 
 c1, c2 = st.columns(2)
 with c1:
-    min_y = st.number_input('Minste verdi y-akse basert på figuren over:',value=-500,min_value=-1000,max_value=1000,step=1)
+    min_y = st.number_input('Min y:',value=-500,min_value=-1000,max_value=1000,step=1)
 with c2:
-    maks_y = st.number_input('Største verdi y-akse basert på figuren over:',value=500,min_value=-1000,max_value=1000,step=1)
+    maks_y = st.number_input('Maks y:',value=500,min_value=-1000,max_value=1000,step=1)
+
+skjul = st.number_input('Skjul øverste X datapunkter, hvor X er:', value=0, min_value=0, step=1)
 
 til_figurtittel = st.text_input('Tillegg til figurtittel, f.eks. "2 timer etter test"')
 st.markdown('---')
@@ -145,10 +147,22 @@ dybde = df_slutt['Lengde']-df_slutt['Lengde'].iloc[0]
 df_slutt['Dybde'] = dybde
 df_slutt['Temp'] = df_slutt['Temp'] + kalibrering
 
+df_slutt.iloc[:skjul, 1] = np.nan
+
 st.markdown('')
 st.markdown('---')
 st.markdown(f'**Temperatur i brønn {valgt_bronn} den {formatted_datetime}:**')
-fig = px.line(df_slutt, x='Temp', y='Dybde',title=f'Temperatur i testbrønn den {formatted_datetime} ({til_figurtittel})', color_discrete_sequence=['#367A2F', '#FFC358'])
+
+if valgt_bronn == 'B3_CH1' or valgt_bronn == 'B3_CH2':
+    bronnummer = 3
+elif valgt_bronn == 'B4':
+    bronnummer = 4
+elif valgt_bronn == 'B5':
+    bronnummer = 5
+elif valgt_bronn == 'B6':
+    bronnummer = 6
+
+fig = px.line(df_slutt, x='Temp', y='Dybde',title=f'Temperatur i testbrønn {bronnummer} den {formatted_datetime} ({til_figurtittel})', color_discrete_sequence=['#367A2F', '#FFC358'])
 if sammenlikn and sammenlikn_fil:
     fig.add_trace(px.line(grov_temp, x='Temp', y='Dybde', color_discrete_sequence=['#FFC358']).data[0])
 fig.update_layout(xaxis_title='Temperatur (\u2103)', yaxis_title='Dybde (m)',legend_title=None)
@@ -157,7 +171,7 @@ fig.update_yaxes(autorange="reversed")
 fig.update_xaxes(range=[min_x, maks_x])
 
 yticks_interval = 10
-yticks_values = list(range(int(df_slutt['Dybde'].min()), int(df_slutt['Dybde'].max())+1, yticks_interval))
+yticks_values = list(range(int(df_slutt['Dybde'].min()), int(df_slutt['Dybde'].max())+10, yticks_interval))
 fig.update_yaxes(tickvals=yticks_values, ticktext=yticks_values)
 
 xticks_interval = 1

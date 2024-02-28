@@ -18,11 +18,10 @@ mappenavn = f'{valgt_bronn}_datafiler'
 
 dir_list = os.listdir(mappenavn)
 
-filnummer = st.slider('Filnummer',min_value=0,max_value=len(dir_list)-1,step=1)
+sammenstilling = st.checkbox('Sammenstilling av flere tidspunkter i samme figur')
 
-filnavn = dir_list[filnummer]
-
-
+filnummer_sjekk = st.slider('Filnummer',min_value=0,max_value=len(dir_list)-1,step=1)
+filnavn = dir_list[filnummer_sjekk]
 filsti = f'{mappenavn}/{filnavn}'
 
 f = open(filsti, "r")
@@ -39,69 +38,82 @@ tid = rader[10].replace('time\t','')
 datetime_str = f"{dato} {tid}"
 datetime_obj = datetime.strptime(datetime_str, '%Y/%m/%d %H:%M:%S')
 formatted_datetime = datetime_obj.strftime('%d.%m.%Y kl. %H:%M:%S')
+st.write(f'Dato for valgt filnummer slider: {formatted_datetime}')
 
-rader_data = rader[26:]
+if sammenstilling == True:
+    c1,c2,c3,c4 = st.columns(4)
+    with c1:
+        nr_1 = st.number_input('Filnummer 1', min_value=0, max_value=len(dir_list)-1, step=1)
+    with c2:
+        nr_2 = st.number_input('Filnummer 2', min_value=0, max_value=len(dir_list)-1, step=1)
+    with c3:
+        nr_3 = st.number_input('Filnummer 3', min_value=0, max_value=len(dir_list)-1, step=1)
+    with c4:
+        nr_4 = st.number_input('Filnummer 4', min_value=0, max_value=len(dir_list)-1, step=1)
+    filnummer = [nr_1, nr_2, nr_3, nr_4]
 
-length = np.zeros(len(rader_data))
-temp = np.zeros(len(rader_data))
-stokes = np.zeros(len(rader_data))
-anti_stokes = np.zeros(len(rader_data))
+elif sammenstilling == False:
+    filnummer = filnummer_sjekk
+    filnummer = [filnummer]
 
-for i in range(0,len(rader_data)-1):
-    kolonner = rader_data[i].split('\t')
-    length[i] = kolonner[0]
-    temp[i] = kolonner[1]
+#########################################################################
+df_liste = []
+formatted_datetime_list = []
+for j in range(0,len(filnummer)):
+    filnavn = dir_list[filnummer[j]]
+    filsti = f'{mappenavn}/{filnavn}'
 
-df = pd.DataFrame({'Lengde':length, 'Temp':temp})
-df = df[df['Temp'] <= 25]
-df = df[df['Temp'] >=-10]  
-df = df[df['Temp'] != 0.0] 
-df = df.reset_index(drop=True)
+    f = open(filsti, "r")
+    filstring = f.read()
+    f.close()
 
+    filstring = filstring.replace(',', '.')
 
+    rader = filstring.split('\n')
 
-#relevant_length = []
-#relevant_temp = []
-#for i in range(0,len(df)-3):
-    #if df['Lengde'].iloc[i+1] - df['Lengde'].iloc[i] < 2:
-    #    relevant_length.append(df['Lengde'].iloc[i])
-    #    relevant_temp.append(df['Temp'].iloc[i])
-#    if abs(df['Temp'].iloc[i+1] - df['Temp'].iloc[i]) < 1 and abs(df['Temp'].iloc[i+2] - df['Temp'].iloc[i]) < 1 and abs(df['Temp'].iloc[i+3] - df['Temp'].iloc[i]) < 1:
-    
-        #if abs(df['Temp'].iloc[i+1] - df['Temp'].iloc[i]) < 0.25: 
-#        relevant_length.append(df['Lengde'].iloc[i])
-#        relevant_temp.append(df['Temp'].iloc[i])
+    dato = rader[9].replace('date\t','')
+    tid = rader[10].replace('time\t','')
 
-#df_ferdig = pd.DataFrame({'Lengde':relevant_length, 'Temp':relevant_temp})
+    datetime_str = f"{dato} {tid}"
+    datetime_obj = datetime.strptime(datetime_str, '%Y/%m/%d %H:%M:%S')
+    formatted_datetime = datetime_obj.strftime('%d.%m.%Y kl. %H:%M:%S')
+    formatted_datetime_list.append(formatted_datetime)
 
-df_ferdig = df
+    rader_data = rader[26:]
 
+    length = np.zeros(len(rader_data))
+    temp = np.zeros(len(rader_data))
+    stokes = np.zeros(len(rader_data))
+    anti_stokes = np.zeros(len(rader_data))
 
-#for i in range(0,len(df_ferdig)-1):
-#    if df_ferdig['Lengde'].iloc[i+1] - df_ferdig['Lengde'].iloc[i] > 10:
-#        del1 = df_ferdig.iloc[:i]
-#        del2 = df_ferdig.iloc[i+1:]
-        
-#        if len(del1)>2:
-#            if abs(del1['Lengde'].iloc[-1]-del1['Lengde'].iloc[0]) > 70:
-#                df_slutt = del1
+    for i in range(0,len(rader_data)-1):
+        kolonner = rader_data[i].split('\t')
+        length[i] = kolonner[0]
+        temp[i] = kolonner[1]
 
-#            elif abs(del2['Lengde'].iloc[-1]-del2['Lengde'].iloc[0]) > 70:
-#                df_slutt = del2
-#            break
-#        elif abs(del2['Lengde'].iloc[-1]-del2['Lengde'].iloc[0]) > 70:
-#                df_slutt = del2
-#    else:
-#        df_slutt = pd.DataFrame(columns=['Lengde','Temp'])
-        #df_slutt = df_ferdig
-        
-#df_slutt = df_slutt.reset_index(drop=True)
-df_slutt = df_ferdig
+        df = pd.DataFrame({'Lengde':length, 'Temp':temp})
+        df = df[df['Temp'] <= 25]
+        df = df[df['Temp'] >=-10]  
+        df = df[df['Temp'] != 0.0] 
+        df = df.reset_index(drop=True)
 
+        df_slutt = df
+    df_liste.append(df_slutt)
+
+#######################################################
 st.markdown('---')
 st.subheader('Temperaturplot uten valgte aksegrenser:')
+empty_df = pd.DataFrame(columns=['Temp', 'Lengde'])
+colors = ['#1d3c34', '#48a23f', '#b7dc8f','#FFC358']
 
-fig = px.line(df_ferdig, x='Temp', y='Lengde', title=f'Temperatur i brønn {valgt_bronn} den {formatted_datetime}', color_discrete_sequence=['#367A2F', '#FFC358'])
+if len(formatted_datetime_list) > 1:
+    tittel = f'Temperatur i brønn {valgt_bronn} mellom ({formatted_datetime_list[0]}) og ({formatted_datetime_list[-1]})'
+else:
+    tittel = f'Temperatur i brønn {valgt_bronn} den {formatted_datetime_list[0]}'
+
+fig = px.line(empty_df, x='Temp', y='Lengde', title=tittel, color_discrete_sequence=['#367A2F', '#FFC358'])
+for k in range(0,len(df_liste)):
+    fig.add_trace(px.line(df_liste[k], x='Temp', y='Lengde', color_discrete_sequence=[colors[k]]).data[0])
 fig.update_layout(xaxis_title='Temperatur (\u2103)', yaxis_title='Dybde (m)',legend_title=None)
 fig.update_layout(height=800)
 fig.update_yaxes(autorange="reversed")
@@ -126,7 +138,8 @@ skjul = st.number_input('Skjul øverste X datapunkter, hvor X er:', value=0, min
 til_figurtittel = st.text_input('Tillegg til figurtittel, f.eks. "2 timer etter test"')
 st.markdown('---')
 
-sammenlikn = st.checkbox('Sammenlikn med grovere måling av uforstyrret temperatur')
+if sammenstilling == False:
+    sammenlikn = st.checkbox('Sammenlikn med grovere måling av uforstyrret temperatur (i ustand)')
 
 if sammenlikn == True:
     sammenlikn_fil = st.file_uploader('Excel-fil med TRT-data og beregninger', type='xlsm')
@@ -139,19 +152,21 @@ if sammenlikn == True:
 else:
     kalibrering = 0
 
-df_slutt = df_slutt[df_slutt['Lengde'] >= min_y] 
-df_slutt = df_slutt[df_slutt['Lengde'] <= maks_y] 
-df_slutt = df_slutt.reset_index(drop=True)
+df_liste_slutt = []
+for j in range(0,len(filnummer)):
+    df_slutt = df_liste[j]
+    df_slutt = df_slutt[df_slutt['Lengde'] >= min_y] 
+    df_slutt = df_slutt[df_slutt['Lengde'] <= maks_y] 
+    df_slutt = df_slutt.reset_index(drop=True)
 
-dybde = df_slutt['Lengde']-df_slutt['Lengde'].iloc[0]
-df_slutt['Dybde'] = dybde
-df_slutt['Temp'] = df_slutt['Temp'] + kalibrering
+    dybde = df_slutt['Lengde']-df_slutt['Lengde'].iloc[0]
+    df_slutt['Dybde'] = dybde
+    df_slutt['Temp'] = df_slutt['Temp'] + kalibrering
 
-df_slutt.iloc[:skjul, 1] = np.nan
+    df_slutt.iloc[:skjul, 1] = np.nan
+    df_liste_slutt.append(df_slutt)
 
 st.markdown('')
-st.markdown('---')
-st.markdown(f'**Temperatur i brønn {valgt_bronn} den {formatted_datetime}:**')
 
 if valgt_bronn == 'B3_CH1' or valgt_bronn == 'B3_CH2':
     bronnummer = 3
@@ -162,13 +177,34 @@ elif valgt_bronn == 'B5':
 elif valgt_bronn == 'B6':
     bronnummer = 6
 
-fig = px.line(df_slutt, x='Temp', y='Dybde',title=f'Temperatur i testbrønn {bronnummer} den {formatted_datetime} ({til_figurtittel})', color_discrete_sequence=['#367A2F', '#FFC358'])
-if sammenlikn and sammenlikn_fil:
-    fig.add_trace(px.line(grov_temp, x='Temp', y='Dybde', color_discrete_sequence=['#FFC358']).data[0])
-fig.update_layout(xaxis_title='Temperatur (\u2103)', yaxis_title='Dybde (m)',legend_title=None)
+
+st.markdown('---')
+
+
+if len(formatted_datetime_list) > 1:
+    nettsidetittel = f'Temperatur i testbrønn {bronnummer} mellom {formatted_datetime_list[0]} og {formatted_datetime_list[-1]} ({til_figurtittel})'
+    tittel_2 = f'Temperatur i testbrønn {bronnummer} ({til_figurtittel})'
+else:
+    tittel_2 = f'Temperatur i testbrønn {bronnummer} den {formatted_datetime_list[0]} ({til_figurtittel})'
+    nettsidetittel = f'Temperatur i testbrønn {bronnummer} den {formatted_datetime_list[0]}'
+
+st.markdown(f'**{nettsidetittel}:**')
+
+
+## PLOTTTT
+fig = px.line(empty_df, x='Temp', y='Lengde',title=tittel_2, color_discrete_sequence=['#367A2F', '#FFC358'])
+for k in range(0,len(df_liste_slutt)):
+    fig.add_trace(px.line(df_liste_slutt[k], x='Temp', y='Dybde', color_discrete_sequence=[colors[k]]).data[0])
+
+#if sammenlikn and sammenlikn_fil:
+#    fig.add_trace(px.line(grov_temp, x='Temp', y='Dybde', color_discrete_sequence=['#FFC358']).data[0])
+
+fig.update_layout(xaxis_title='Temperaturmåling (\u2103)', yaxis_title='Dybde (m)',legend_title=None)
 fig.update_layout(height=600)
 fig.update_yaxes(autorange="reversed")
 fig.update_xaxes(range=[min_x, maks_x])
+
+fig.update_layout(xaxis_title='Temperaturmåling (°C)', yaxis_title='Dybde (m)', height=600)
 
 yticks_interval = 10
 yticks_values = list(range(int(df_slutt['Dybde'].min()), int(df_slutt['Dybde'].max())+10, yticks_interval))
@@ -186,9 +222,7 @@ fig.update_layout(
     plot_bgcolor='white',   # Set the background color of the plot area
 )
 
-#fig.update_yaxes(range=[min_y-df_slutt['Lengde'].iloc[0], maks_y-df_slutt['Lengde'].iloc[0]])
 st.plotly_chart(fig)
-
 
 
 # Create an in-memory buffer
@@ -198,12 +232,20 @@ buffer = io.BytesIO()
 fig.write_image(file=buffer, format="png")
 
 # Download the pdf from the buffer
-st.download_button(
-    label="Last ned figuren over som PNG",
-    data=buffer,
-    file_name=f"Temp_{valgt_bronn}_{formatted_datetime}.png",
-    mime="application/png",
-)
+if sammenstilling == True:
+    st.download_button(
+        label="Last ned figuren over som PNG",
+        data=buffer,
+        file_name=f"Temp_{valgt_bronn}_flere_kurver.png",
+        mime="application/png",
+    )
+else:
+        st.download_button(
+        label="Last ned figuren over som PNG",
+        data=buffer,
+        file_name=f"Temp_{valgt_bronn}_{formatted_datetime_list[0]}.png",
+        mime="application/png",
+    )
 
 
 

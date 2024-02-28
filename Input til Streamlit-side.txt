@@ -1,33 +1,47 @@
 Input for testbrønner på Nyhavna.
 
 B3: 
+Start test: 01.12 kl. 12.38 + 13.50
+Slutt test: 05.12 kl. 06.52
 140 m til 355 m
-0 grader til 6 grader
+-4 grader til 3 grader
 3 døgn før, 3.5, 4, 5, 6, 7 timer etter test
+Mellom 3 døgn før og 3.5 timer etter er det ingen gyldige målinger
 28.11 kl. 12.37.30, 
 5.12 kl 10.27.28, 
 5.12 kl. 10.52.29
 ...
 5.13 kl. 13.52.28
+Filnumre sammenstilling etter: 5,17,29,41
 Addisjonsfaktor: 9.3 grader før test, 10.3 grader 7 timer etter test
 
 B4: 
+Start test: 15.12 kl. 15.45 + 16.56
+Slutt test: 18.12 kl. 13.54
 253 m til 355 m
-0 grader til 6 grader
-1, 2, 3, 4, 5 timer etter test
+-1 grader til 6 grader
+rett før + 0, 1, 2, 3, 4 timer etter test
 Før test: 15.12 kl 15.30.13
 ...
+Filnumre sammenstilling etter: 293,305,317,329
 Addisjonsfaktor: 7.9 grader før test
 
 B5: 
+Start test: 11.12 kl. 15.24 + 16.26
+Slutt test: 13.12 kl. 15.58
 204 m til 355 m
-0 grader til 6 grader
-0, 1, 2, 3, 4, 5 timer etter test
+-2 grader til 6 grader
+rett før + 0, 1, 2, 3, 4 timer etter test
 Før test: 11.12 kl. 15.02.13
 ...
+Filnumre sammenstilling etter: 609,621,633,645
 Addisjonsfaktor: 9.2 grader før test
 
 B6:
+Start test: 07.12 kl. 10.29 + 11.22
+Slutt test: 11.12 kl. 06.43
 194 m til 355 m
-0 grader til 6 grader
-0, 1, 2, 3 timer etter test
+-4 grader til 5 grader
+rett før + 0, 1, 2, 3 timer etter test
+Senere enn 3 timer etter test er ikke tilgjengelig
+Filnumre sammenstilling etter: 1117,1129,1141,(1141)

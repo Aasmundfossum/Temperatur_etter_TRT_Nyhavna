@@ -1,0 +1,27 @@
+Resultater i GHEtool er avhengige av borehole buried Depth fordi:
+
+gfunc_calculated = gt.gfunction.gFunction(borefield, alpha, time_values, options=self.options,method=self.options['method']).gFunc
+
+brukes i
+
+gfunc_uniform_T = gvalues(time_value_new, borefield, alpha, depth, interpolate)
+
+som brukes i
+
+self.gfunction_calculation_object.calculate(time_value, self.borefield,self.ground_data.alpha(H_var),interpolate=self._calculation_setup.interpolate_gfunctions)
+
+som brukes i
+
+g_values = self.gfunction(self.load.time_L4, H)
+
+som brukes i
+
+self.results = calculate_temperatures(H, hourly=hourly)
+
+som brukes i
+
+self._calculate_temperature_profile(H=depth, hourly=hourly)
+
+som brukes i 
+
+borefield.calculate_temperatures(hourly=True)

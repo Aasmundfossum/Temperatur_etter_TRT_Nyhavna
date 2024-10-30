@@ -7,6 +7,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from GHEtool import HourlyGeothermalLoad, Borefield, GroundFluxTemperature, GroundLayer
 
+
 def temperature_plot(df, x_series, y_series, min_value = 0, max_value = 10): #self,
     fig = px.line(df, x=x_series, y=y_series, labels={'Value': y_series, 'Timestamp': 'Tid'}, color_discrete_sequence=[f"rgba(29, 60, 52, 0.75)"])
     fig.update_xaxes(type='category')
@@ -98,22 +99,24 @@ borefield.set_load(load=load)
 # Grunn
 #ground_data = GroundFluxTemperature(k_s = 3.8, T_g=8, flux=0, volumetric_heat_capacity=2.16e6)
 
-#layer_1 = GroundLayer(k_s=0.1, volumetric_heat_capacity=2.16e6, thickness=2)
-layer_1 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=2)
-layer_2 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=150)
-layer_3 = GroundLayer(k_s=2, volumetric_heat_capacity=2.16e6, thickness=100)
+layer_1 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=50)
+#layer_1 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=2)
+layer_2 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=50)
+layer_3 = GroundLayer(k_s=3, volumetric_heat_capacity=2.16e6, thickness=500)
 
-st.write('Hit 1')
 ground_data = GroundFluxTemperature(T_g=8, flux=0, volumetric_heat_capacity=2.16e6)
 ground_data.add_layer_on_bottom([layer_1, layer_2, layer_3])                   # Layer 1 havner i øverste del av brønnen, og layer 3 i nederste
 #ground_data.add_layer_on_top([layer_1, layer_2, layer_3])                     # Layer 3 havner i øverste del av brønnen, og layer 1 i nederste. Hvis denne brukes må summen av tykkelser være større enn dybden
-st.write('Hit 2')                                                              # De plasseres x antall meter ned i borehullet, og påvirkes ikke av borehole buried depth     
+                                                                             # De plasseres x antall meter ned i borehullet, og påvirkes ikke av borehole buried depth     
 
-st.write(f'Termisk ledningsevne: {ground_data.k_s(100)} W/mK')                # Regner ut gjennomsnittlig k_s for dybder ned til hit
-st.write('Hit 2.5')
+st.write(f'Termisk ledningsevne: {ground_data.k_s(170)} W/mK')               # Regner ut gjennomsnittlig k_s for dybder ned til hit
+
+
 ks_depths = []
 for i in range(0,305,5):
     ks_depths.append(ground_data.k_s(i))
+
+st.write(np.mean(ks_depths))
 
 fig = plt.figure()
 plt.plot(np.arange(0,305,5), ks_depths, color='red', linewidth=2)
@@ -122,11 +125,9 @@ plt.ylabel('Ledningsevne (W/mK)')
 plt.grid()
 st.pyplot(fig)
 
-st.write('Hit 3')
-
 borefield.set_ground_parameters(data=ground_data)
-borefield.Rb = 0.10   
-st.write('Hit 4')
+borefield.Rb = 0.13   
+st.write(borefield.borehole.get_Rb(300,10,0.114/2,3))
 
 # Felt/konfigurasjon
 field = gt.boreholes.rectangle_field(
@@ -135,20 +136,25 @@ field = gt.boreholes.rectangle_field(
         B_1=5,
         B_2=5,
         H=300,
-        D=10, # borehole buried depth            Har ingen betydning for plassering av layers
+        D=10, # borehole buried depth                                               Har ingen betydning for plassering av layers
         r_b=0.1143/2, # borehole radius
         tilt=0 # tilt
         )
 borefield.set_borefield(borefield = field)
 
-st.write('Hit 5')
+##st.write(borefield.borefield)
+
 #st.pyplot(gt.boreholes.visualize_field(field))
 
 # Beregning
 #borefield.calculation_setup(use_constant_Rb=True)           # Å sette use_constant_Rb til True skal være ekvivalent med å avhuke boksen "Account for internal heat transfer" i EED
-borefield.calculate_temperatures(hourly=True)
+st.write(borefield.Rb)
+st.write(borefield.ground_data.alpha(100))
+borefield.calculate_temperatures(hourly=True)               # Denne funksjonen finnes i GHEtool/GHEtool/Borefield.py, linje 1609->
+#st.write(borefield.results)
+greie = gt.gfunction.gFunction(borefield.borefield, 1.38e-6, np.array([80000]))#.gFunc          # Denne beregnede g-funksjonen er avhengig av borehole buried depth
+st.write(greie.gFunc)
 
-st.write('Hit 6')
 # Resultater
 #st.write(borefield.Rb)
 #st.write(vars(borefield.results))
